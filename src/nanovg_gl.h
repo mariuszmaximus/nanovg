@@ -40,7 +40,7 @@ enum NVGcreateFlags {
 #elif defined NANOVG_GL3_IMPLEMENTATION
 #  define NANOVG_GL3 1
 #  define NANOVG_GL_IMPLEMENTATION 1
-#  define NANOVG_GL_USE_UNIFORMBUFFER 1
+//#  define NANOVG_GL_USE_UNIFORMBUFFER 1
 #elif defined NANOVG_GLES2_IMPLEMENTATION
 #  define NANOVG_GLES2 1
 #  define NANOVG_GL_IMPLEMENTATION 1
@@ -253,8 +253,8 @@ struct GLNVGcontext {
 	int cpaths;
 	int npaths;
 	struct NVGvertex* verts;
-	int cverts;
-	int nverts;
+	int cverts;  // current size
+	int nverts;  // used size
 	unsigned char* uniforms;
 	int cuniforms;
 	int nuniforms;
@@ -1027,7 +1027,20 @@ static void glnvg__fill(GLNVGcontext* gl, GLNVGcall* call)
 	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 	glDisable(GL_CULL_FACE);
 	for (i = 0; i < npaths; i++)
+	{
 		glDrawArrays(GL_TRIANGLE_FAN, paths[i].fillOffset, paths[i].fillCount);
+
+		#ifdef MORE_DEBUG
+		   NVGvertex* vertex = gl->verts;
+		   printf("npaths[%d]\n",i);
+		   for(int n=0; n < paths[i].fillCount ; ++n )
+		   {
+			   int idx = paths[i].fillOffset+n;
+			   printf("[%4d, %4d] xy(%f; %f) uv(%f; %f)\n", n, idx, vertex[idx].x, vertex[idx].y, vertex[idx].u, vertex[idx].v );
+		   }
+		#endif
+
+	}
 	glEnable(GL_CULL_FACE);
 
 	// Draw anti-aliased pixels
@@ -1049,6 +1062,16 @@ static void glnvg__fill(GLNVGcontext* gl, GLNVGcall* call)
 	glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 	glDrawArrays(GL_TRIANGLE_STRIP, call->triangleOffset, call->triangleCount);
 
+	#ifdef MORE_DEBUG
+		NVGvertex* vertex = gl->verts;
+		printf("npaths[%d]\n",i);
+		for(int n=0; n < call->triangleCount ; ++n )
+		{
+			int idx = call->triangleOffset+n;
+			printf("[%4d, %4d] xy(%f; %f) uv(%f; %f)\n", n, idx, vertex[idx].x, vertex[idx].y, vertex[idx].u, vertex[idx].v );
+		}
+	#endif
+
 	glDisable(GL_STENCIL_TEST);
 }
 
@@ -1062,6 +1085,15 @@ static void glnvg__convexFill(GLNVGcontext* gl, GLNVGcall* call)
 
 	for (i = 0; i < npaths; i++) {
 		glDrawArrays(GL_TRIANGLE_FAN, paths[i].fillOffset, paths[i].fillCount);
+		#ifdef MORE_DEBUG
+		   NVGvertex* vertex = gl->verts;
+		   printf("npaths[%d]\n",i);
+		   for(int n=0; n < paths[i].fillCount ; ++n )
+		   {
+			   int idx = paths[i].fillOffset+n;
+			   printf("[%4d, %4d] xy(%f; %f) uv(%f; %f)\n", n, idx, vertex[idx].x, vertex[idx].y, vertex[idx].u, vertex[idx].v );
+		   }
+		#endif
 		// Draw fringes
 		if (paths[i].strokeCount > 0) {
 			glDrawArrays(GL_TRIANGLE_STRIP, paths[i].strokeOffset, paths[i].strokeCount);
@@ -1239,9 +1271,9 @@ static void glnvg__renderFlush(void* uptr)
 			GLNVGcall* call = &gl->calls[i];
 			glnvg__blendFuncSeparate(gl,&call->blendFunc);
 			if (call->type == GLNVG_FILL)
-				glnvg__fill(gl, call);
+				glnvg__fill(gl, call);  // GL_TRIANGLE_FAN 
 			else if (call->type == GLNVG_CONVEXFILL)
-				glnvg__convexFill(gl, call);
+				glnvg__convexFill(gl, call); // GL_TRIANGLE_FAN 
 			else if (call->type == GLNVG_STROKE)
 				glnvg__stroke(gl, call);
 			else if (call->type == GLNVG_TRIANGLES)

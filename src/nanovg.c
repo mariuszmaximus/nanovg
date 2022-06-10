@@ -58,6 +58,7 @@ enum NVGcommands {
 	NVG_BEZIERTO = 2,
 	NVG_CLOSE = 3,
 	NVG_WINDING = 4,
+	NVG_XYUV =    5,
 };
 
 enum NVGpointFlags
@@ -66,6 +67,7 @@ enum NVGpointFlags
 	NVG_PT_LEFT = 0x02,
 	NVG_PT_BEVEL = 0x04,
 	NVG_PR_INNERBEVEL = 0x08,
+	NVG_PT_CORNER_XYUV = 0x10,
 };
 
 struct NVGstate {
@@ -95,6 +97,8 @@ struct NVGpoint {
 	float len;
 	float dmx, dmy;
 	unsigned char flags;
+	float u;
+	float v;
 };
 typedef struct NVGpoint NVGpoint;
 
@@ -1118,6 +1122,11 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 		case NVG_WINDING:
 			i += 2;
 			break;
+		case NVG_XYUV:
+			nvgTransformPoint(&vals[i+1],&vals[i+2], state->xform, vals[i+1],vals[i+2]);
+			nvgTransformPoint(&vals[i+3],&vals[i+4], state->xform, vals[i+3],vals[i+4]);
+			i += 5;
+			break;
 		default:
 			i++;
 		}
@@ -1170,6 +1179,7 @@ static NVGpoint* nvg__lastPoint(NVGcontext* ctx)
 
 static void nvg__addPoint(NVGcontext* ctx, float x, float y, int flags)
 {
+	printf("nvg__addPoint (%f %f)\n", x,y);
 	NVGpath* path = nvg__lastPath(ctx);
 	NVGpoint* pt;
 	if (path == NULL) return;
@@ -1196,10 +1206,24 @@ static void nvg__addPoint(NVGcontext* ctx, float x, float y, int flags)
 	pt->x = x;
 	pt->y = y;
 	pt->flags = (unsigned char)flags;
+	//pt->u = u; // in  nvg__addPointXYUV
+	//pt->v = v; 
 
 	ctx->cache->npoints++;
 	path->count++;
 }
+
+static void nvg__addPointXYUV(NVGcontext* ctx, float x, float y, int flags, float u, float v)
+{
+	nvg__addPoint(ctx,x,y,flags);
+	int idx = ctx->cache->npoints;
+	idx--;
+	NVGpoint* pt;
+	pt = &ctx->cache->points[idx];
+	pt->u = u;
+	pt->v = v;
+}
+
 
 static void nvg__closePath(NVGcontext* ctx)
 {
@@ -1341,23 +1365,28 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 	if (cache->npaths > 0)
 		return;
 
+
+	printf("Commands:\n");
 	// Flatten
 	i = 0;
 	while (i < ctx->ncommands) {
 		int cmd = (int)ctx->commands[i];
 		switch (cmd) {
 		case NVG_MOVETO:
+		    printf("	NVG_MOVETO\n");
 			nvg__addPath(ctx);
 			p = &ctx->commands[i+1];
 			nvg__addPoint(ctx, p[0], p[1], NVG_PT_CORNER);
 			i += 3;
 			break;
 		case NVG_LINETO:
+		    printf("	NVG_LINETO\n");
 			p = &ctx->commands[i+1];
 			nvg__addPoint(ctx, p[0], p[1], NVG_PT_CORNER);
 			i += 3;
 			break;
 		case NVG_BEZIERTO:
+		    printf("	NVG_BEZIERTO\n");
 			last = nvg__lastPoint(ctx);
 			if (last != NULL) {
 				cp1 = &ctx->commands[i+1];
@@ -1368,12 +1397,21 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 			i += 7;
 			break;
 		case NVG_CLOSE:
+		    printf("	NVG_CLOSE\n");
 			nvg__closePath(ctx);
 			i++;
 			break;
 		case NVG_WINDING:
+		    printf("	NVG_WINDING\n");
 			nvg__pathWinding(ctx, (int)ctx->commands[i+1]);
 			i += 2;
+			break;
+		case NVG_XYUV:
+		    printf("	NVG_XYUV\n");
+			p = &ctx->commands[i+1];
+			nvg__addPoint(ctx, p[0], p[1], NVG_PT_CORNER_XYUV);
+			nvg__addPoint(ctx, p[2], p[3], NVG_PT_CORNER_XYUV);
+			i += 5;
 			break;
 		default:
 			i++;
@@ -1848,6 +1886,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 
 static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLimit)
 {
+	printf("nvg__expandFill\n");
 	NVGpathCache* cache = ctx->cache;
 	NVGvertex* verts;
 	NVGvertex* dst;
@@ -1913,7 +1952,11 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 			}
 		} else {
 			for (j = 0; j < path->count; ++j) {
-				nvg__vset(dst, pts[j].x, pts[j].y, 0.5f,1);
+				// tutaj 
+				if ((pts[j].flags & NVG_XYUV) == NVG_XYUV)
+	  				nvg__vset(dst, pts[j].x, pts[j].y, pts[j].u,pts[j].v);
+				else
+					nvg__vset(dst, pts[j].x, pts[j].y, 0.5f,1);
 				dst++;
 			}
 		}
@@ -1977,6 +2020,12 @@ void nvgBeginPath(NVGcontext* ctx)
 void nvgMoveTo(NVGcontext* ctx, float x, float y)
 {
 	float vals[] = { NVG_MOVETO, x, y };
+	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+}
+
+void nvgXYUV(NVGcontext* ctx, float x, float y, float u, float v)
+{
+	float vals[] = { NVG_XYUV, x, y, u, v };
 	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
 }
 

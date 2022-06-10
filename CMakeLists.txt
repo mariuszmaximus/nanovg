@@ -10,6 +10,7 @@ add_compile_definitions(NANOVG_GLEW)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 add_compile_definitions(DEMO_MSAA) 
 add_compile_definitions(NANOVG_EXAMPLE_FOLDER="../../example/")  # path for fonts and images
+add_compile_definitions(MORE_DEBUG)
 set(NANOVG_GLES OFF) 
 
 add_library(nanovg src/nanovg.c src/nanovg.h)
@@ -24,6 +25,9 @@ target_link_libraries(example_gl2 nanovg  ${CONAN_LIBS})
 
 add_executable(example_gl3 example/example_gl3.c  example/demo.c  example/perf.c )
 target_link_libraries(example_gl3 nanovg  ${CONAN_LIBS})
+
+add_executable(example_gl3a example/example_gl3a.c  example/demo.c  example/perf.c )
+target_link_libraries(example_gl3a nanovg  ${CONAN_LIBS})
 
 if(NANOVG_GLES)
     add_executable(example_gles2 example/example_gles2.c  example/demo.c  example/perf.c )
