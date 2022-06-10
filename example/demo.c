@@ -17,6 +17,10 @@
 #include <iconv.h>
 #endif
 
+#ifndef NANOVG_EXAMPLE_FOLDER 
+	#define NANOVG_EXAMPLE_FOLDER "../example/"
+#endif	 
+
 #define ICON_SEARCH 0x1F50D
 #define ICON_CIRCLED_CROSS 0x2716
 #define ICON_CHEVRON_RIGHT 0xE75E
@@ -811,7 +815,7 @@ int loadDemoData(NVGcontext* vg, DemoData* data)
 
 	for (i = 0; i < 12; i++) {
 		char file[128];
-		snprintf(file, 128, "../example/images/image%d.jpg", i+1);
+		snprintf(file, 128, NANOVG_EXAMPLE_FOLDER "images/image%d.jpg", i+1);
 		data->images[i] = nvgCreateImage(vg, file, 0);
 		if (data->images[i] == 0) {
 			printf("Could not load %s.\n", file);
@@ -819,22 +823,22 @@ int loadDemoData(NVGcontext* vg, DemoData* data)
 		}
 	}
 
-	data->fontIcons = nvgCreateFont(vg, "icons", "../example/entypo.ttf");
+	data->fontIcons = nvgCreateFont(vg, "icons", NANOVG_EXAMPLE_FOLDER "entypo.ttf");
 	if (data->fontIcons == -1) {
 		printf("Could not add font icons.\n");
 		return -1;
 	}
-	data->fontNormal = nvgCreateFont(vg, "sans", "../example/Roboto-Regular.ttf");
+	data->fontNormal = nvgCreateFont(vg, "sans", NANOVG_EXAMPLE_FOLDER "Roboto-Regular.ttf");
 	if (data->fontNormal == -1) {
 		printf("Could not add font italic.\n");
 		return -1;
 	}
-	data->fontBold = nvgCreateFont(vg, "sans-bold", "../example/Roboto-Bold.ttf");
+	data->fontBold = nvgCreateFont(vg, "sans-bold", NANOVG_EXAMPLE_FOLDER "Roboto-Bold.ttf");
 	if (data->fontBold == -1) {
 		printf("Could not add font bold.\n");
 		return -1;
 	}
-	data->fontEmoji = nvgCreateFont(vg, "emoji", "../example/NotoEmoji-Regular.ttf");
+	data->fontEmoji = nvgCreateFont(vg, "emoji", NANOVG_EXAMPLE_FOLDER "NotoEmoji-Regular.ttf");
 	if (data->fontEmoji == -1) {
 		printf("Could not add font emoji.\n");
 		return -1;
@@ -843,6 +847,7 @@ int loadDemoData(NVGcontext* vg, DemoData* data)
 	nvgAddFallbackFontId(vg, data->fontBold, data->fontEmoji);
 
 	return 0;
+	#undef SAMPLE_RES_PATH	
 }
 
 void freeDemoData(NVGcontext* vg, DemoData* data)
