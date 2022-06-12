@@ -464,6 +464,9 @@ void nvgBeginPath(NVGcontext* ctx);
 // Starts new sub-path with specified point as first point.
 void nvgMoveTo(NVGcontext* ctx, float x, float y);
 
+void nvgXYUVMoveTo(NVGcontext* ctx, float x, float y,float u, float v);
+void nvgXYUV(NVGcontext* ctx, float x, float y, float u, float v);
+
 // Adds line segment from the last point in the path to the specified point.
 void nvgLineTo(NVGcontext* ctx, float x, float y);
 
@@ -591,6 +594,9 @@ void nvgFontFaceId(NVGcontext* ctx, int font);
 
 // Sets the font face based on specified name of current text style.
 void nvgFontFace(NVGcontext* ctx, const char* font);
+
+// Draw XYUV
+float nvgXYUV_ADD(NVGcontext* ctx);
 
 // Draws text string at specified location. If end is specified only the sub-string up to the end is drawn.
 float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end);

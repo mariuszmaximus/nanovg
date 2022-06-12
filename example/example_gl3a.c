@@ -66,41 +66,80 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 				float t, int blowup, DemoData* data)
 {
 
+	nvgStrokeColor(vg, nvgRGBA(0,0,0,32));
+	nvgStroke(vg);
+	return;
+	
+	if(2<1)
+	{
+		nvgXYUV_ADD(vg);
+		return;
+	}
+
+	//if(2<1)
+	{
+		nvgFontFace(vg, "sans");
+
+		nvgFontSize(vg, 112.0f);
+		nvgTextAlign(vg, NVG_ALIGN_LEFT|NVG_ALIGN_TOP);
+		nvgFillColor(vg, nvgRGBA(240,240,240,192));
+  	    nvgText(vg, width/2,height/2, "title", NULL);
+  		return;
+	}
+
+	if(2<1)
+	{
 	NVGpaint imgPaint = nvgImagePattern(vg, imgw, imgw, imgw,imgh, 0, image0, 1);
 		nvgBeginPath(vg);
 
-		//nvgRect(vg, 0,0, width/2 ,height/2);
+	// 	//nvgRect(vg, 0,0, width/2 ,height/2);
 
-		nvgMoveTo(vg,100+200,100); // top left corner
-			nvgLineTo(vg,400+200,100); // top right corner: 100 (x) + 300 (w), y remains
-			nvgLineTo(vg,400+200,250); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+200,250); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+200-200,(250+100)/2); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+200,100); // back to top left
+	// 	// nvgMoveTo(vg,100+200,100); // top left corner
+	// 	// 	nvgLineTo(vg,400+200,100); // top right corner: 100 (x) + 300 (w), y remains
+	// 	// 	nvgLineTo(vg,400+200,250); // bottom left corner: x remains, 100 (y) + 150 (h)
+	// 	// nvgLineTo(vg,100+200,250); // bottom left corner: x remains, 100 (y) + 150 (h)
+	// 	// nvgLineTo(vg,100+200-200,(250+100)/2); // bottom left corner: x remains, 100 (y) + 150 (h)
+	// 	// nvgLineTo(vg,100+200,100); // back to top left
+
+		nvgXYUVMoveTo(vg,100,100,   0,0); 
+		nvgXYUV(vg,100,200, 0, 1);
+		// 
+		nvgXYUV(vg,200,100, 0.5, 0);
+		nvgXYUV(vg,200,200, 0.5, 1);
+
+		nvgXYUV(vg,300,100, 1, 0);
+		nvgXYUV(vg,300,200, 1, 1);
 
 
 		nvgFillPaint(vg, imgPaint);
-		nvgFill(vg);
+	 	nvgFill(vg);
 		nvgClosePath(vg);		
       return;
-
+	}
+	if (2<1)
 	{
+	    NVGpaint imgPaint = nvgImagePattern(vg, imgw, imgw, imgw,imgh, 0, image0, 1);
+
 		nvgBeginPath(vg);
 
-		nvgMoveTo(vg,100+200,100); // top left corner
-		nvgLineTo(vg,400+200,100); // top right corner: 100 (x) + 300 (w), y remains
+		//nvgMoveTo(vg,100+200,100); // top left corner
+		nvgXYUVMoveTo(vg,100+200,100,1,1);
+		//nvgLineTo(vg,400+200,100); // top right corner: 100 (x) + 300 (w), y remains
+		nvgXYUV(vg,400+200,100,1,1);
+		
 		//nvgLineTo(vg,400+200,250); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+200,250); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+200,100); // back to top left
+		nvgXYUV(vg,100+200,250,1,1); // bottom left corner: x remains, 100 (y) + 150 (h)
+		nvgXYUV(vg,100+200,100,1,1); // back to top left
 
-		nvgMoveTo(vg,100+600,100); // top left corner
-		nvgLineTo(vg,400+600,100); // top right corner: 100 (x) + 300 (w), y remains
-		nvgLineTo(vg,400+600,250); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+600,250); // bottom left corner: x remains, 100 (y) + 150 (h)
-		nvgLineTo(vg,100+600,100); // back to top left
+		nvgXYUV(vg,100+600,100,1,1); // top left corner
+		nvgXYUV(vg,400+600,100,1,1); // top right corner: 100 (x) + 300 (w), y remains
+		nvgXYUV(vg,400+600,250,1,1); // bottom left corner: x remains, 100 (y) + 150 (h)
+		nvgXYUV(vg,100+600,250,1,1); // bottom left corner: x remains, 100 (y) + 150 (h)
+		nvgXYUV(vg,100+600,100,1,1); // back to top left
 
 
 		nvgFillColor(vg,nvgRGBA(255, 0, 255, 127));
+		nvgFillPaint(vg, imgPaint);
 		nvgFill(vg);
 
 		nvgClosePath(vg);

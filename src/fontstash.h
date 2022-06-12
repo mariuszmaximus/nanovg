@@ -1459,6 +1459,7 @@ int fonsTextIterNext(FONScontext* stash, FONStextIter* iter, FONSquad* quad)
 
 void fonsDrawDebug(FONScontext* stash, float x, float y)
 {
+	// tutaj 
 	int i;
 	int w = stash->params.width;
 	int h = stash->params.height;

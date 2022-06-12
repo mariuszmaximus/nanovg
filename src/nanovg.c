@@ -58,7 +58,8 @@ enum NVGcommands {
 	NVG_BEZIERTO = 2,
 	NVG_CLOSE = 3,
 	NVG_WINDING = 4,
-	NVG_XYUV =    5,
+	NVG_XYUVSTART =    5,
+	NVG_XYUV =    6,
 };
 
 enum NVGpointFlags
@@ -1095,6 +1096,17 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 	if ((int)vals[0] != NVG_CLOSE && (int)vals[0] != NVG_WINDING) {
 		ctx->commandx = vals[nvals-2];
 		ctx->commandy = vals[nvals-1];
+
+		if((int)vals[0] == NVG_XYUVSTART)
+		{
+  			ctx->commandx = vals[nvals-2-2];
+			ctx->commandy = vals[nvals-1-2];
+		}
+		if((int)vals[0] == NVG_XYUV)
+		{
+  			ctx->commandx = vals[nvals-2-2];
+			ctx->commandy = vals[nvals-1-2];
+		}
 	}
 
 	// transform commands
@@ -1122,9 +1134,12 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 		case NVG_WINDING:
 			i += 2;
 			break;
+		case NVG_XYUVSTART:
+			nvgTransformPoint(&vals[i+1],&vals[i+2], state->xform, vals[i+1],vals[i+2]);
+			i += 5;
+			break;
 		case NVG_XYUV:
 			nvgTransformPoint(&vals[i+1],&vals[i+2], state->xform, vals[i+1],vals[i+2]);
-			nvgTransformPoint(&vals[i+3],&vals[i+4], state->xform, vals[i+3],vals[i+4]);
 			i += 5;
 			break;
 		default:
@@ -1218,8 +1233,7 @@ static void nvg__addPointXYUV(NVGcontext* ctx, float x, float y, int flags, floa
 	nvg__addPoint(ctx,x,y,flags);
 	int idx = ctx->cache->npoints;
 	idx--;
-	NVGpoint* pt;
-	pt = &ctx->cache->points[idx];
+	NVGpoint* pt = &ctx->cache->points[idx];
 	pt->u = u;
 	pt->v = v;
 }
@@ -1406,11 +1420,18 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 			nvg__pathWinding(ctx, (int)ctx->commands[i+1]);
 			i += 2;
 			break;
+		case NVG_XYUVSTART:
+		    printf("	NVG_XYUVSTART\n");
+			nvg__addPath(ctx);
+			p = &ctx->commands[i+1];
+			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
+			i += 5;
+			break;
+
 		case NVG_XYUV:
 		    printf("	NVG_XYUV\n");
 			p = &ctx->commands[i+1];
-			nvg__addPoint(ctx, p[0], p[1], NVG_PT_CORNER_XYUV);
-			nvg__addPoint(ctx, p[2], p[3], NVG_PT_CORNER_XYUV);
+			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
 			i += 5;
 			break;
 		default:
@@ -1953,10 +1974,12 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 		} else {
 			for (j = 0; j < path->count; ++j) {
 				// tutaj 
-				if ((pts[j].flags & NVG_XYUV) == NVG_XYUV)
-	  				nvg__vset(dst, pts[j].x, pts[j].y, pts[j].u,pts[j].v);
-				else
-					nvg__vset(dst, pts[j].x, pts[j].y, 0.5f,1);
+				printf("flags=%d xy(%f %f) uv(%f %f)\n", pts[j].flags, pts[j].x, pts[j].y, pts[j].u, pts[j].v);
+				// if ((pts[j].flags & NVG_PT_CORNER_XYUV) == NVG_PT_CORNER_XYUV)
+	  			// 	nvg__vset(dst, pts[j].x, pts[j].y, pts[j].u,pts[j].v);
+				// else
+				// 	nvg__vset(dst, pts[j].x, pts[j].y, 0.5f,1);
+	  			 	nvg__vset(dst, pts[j].x, pts[j].y, pts[j].u,pts[j].v);
 				dst++;
 			}
 		}
@@ -2019,7 +2042,13 @@ void nvgBeginPath(NVGcontext* ctx)
 
 void nvgMoveTo(NVGcontext* ctx, float x, float y)
 {
-	float vals[] = { NVG_MOVETO, x, y };
+	float vals[] = { NVG_MOVETO, x, y ,x, y};
+	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+}
+
+void nvgXYUVMoveTo(NVGcontext* ctx, float x, float y,float u, float v)
+{
+	float vals[] = { NVG_XYUVSTART, x, y, u, v };
 	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
 }
 
@@ -2503,10 +2532,50 @@ static void nvg__renderText(NVGcontext* ctx, NVGvertex* verts, int nverts)
 	ctx->textTriCount += nverts/3;
 }
 
+static void nvg__renderXYUV(NVGcontext* ctx, NVGvertex* verts, int nverts)
+{
+	NVGstate* state = nvg__getState(ctx);
+	NVGpaint paint = state->fill;
+
+	// Render triangles.
+	paint.image = ctx->fontImages[ctx->fontImageIdx];
+
+	// Apply global alpha
+	paint.innerColor.a *= state->alpha;
+	paint.outerColor.a *= state->alpha;
+
+	ctx->params.renderTriangles(ctx->params.userPtr, &paint, state->compositeOperation, &state->scissor, verts, nverts, ctx->fringeWidth);
+
+	ctx->drawCallCount++;
+	ctx->textTriCount += nverts/3;
+}
+
+
 static int nvg__isTransformFlipped(const float *xform)
 {
 	float det = xform[0] * xform[3] - xform[2] * xform[1];
 	return( det < 0);
+}
+
+float nvgXYUV_ADD(NVGcontext* ctx)
+{
+	int cverts = 0;
+	NVGvertex* verts;	
+	int nverts = 0;	
+
+	cverts = 6; // conservative estimate.
+	verts = nvg__allocTempVerts(ctx, cverts);
+	if (verts == NULL) return 0;
+
+	nvg__vset(&verts[nverts], 100, 100, 0, 0); nverts++;
+	nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
+	nvg__vset(&verts[nverts], 300, 100, 0, 1); nverts++;
+	nvg__vset(&verts[nverts], 300, 100, 0, 1); nverts++;
+	nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
+	nvg__vset(&verts[nverts], 300, 300, 1, 1); nverts++;
+
+	nvg__renderXYUV(ctx, verts, nverts);
+	return 1.0;	
 }
 
 float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end)
@@ -2517,6 +2586,7 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	NVGvertex* verts;
 	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
+	// ilosc wierzcholkow trójkata 
 	int cverts = 0;
 	int nverts = 0;
 	int isFlipped = nvg__isTransformFlipped(state->xform);

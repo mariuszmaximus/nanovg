@@ -1154,6 +1154,17 @@ static void glnvg__triangles(GLNVGcontext* gl, GLNVGcall* call)
 	glnvg__checkError(gl, "triangles fill");
 
 	glDrawArrays(GL_TRIANGLES, call->triangleOffset, call->triangleCount);
+
+
+	#ifdef MORE_DEBUG
+		NVGvertex* vertex = gl->verts;
+		printf("triangleCount=%d]\n", call->triangleCount);
+		for(int n=0; n < call->triangleCount ; ++n )
+		{
+			int idx = call->triangleOffset+n;
+			printf("[%4d, %4d] xy(%f; %f) uv(%f; %f)\n", n, idx, vertex[idx].x, vertex[idx].y, vertex[idx].u, vertex[idx].v );
+		}
+	#endif
 }
 
 static void glnvg__renderCancel(void* uptr) {
