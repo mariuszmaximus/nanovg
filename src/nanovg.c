@@ -2041,7 +2041,7 @@ void nvgBeginPath(NVGcontext* ctx)
 
 void nvgMoveTo(NVGcontext* ctx, float x, float y)
 {
-	float vals[] = { NVG_MOVETO, x, y ,x, y};
+	float vals[] = { NVG_MOVETO, x, y };
 	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
 }
 
@@ -2537,7 +2537,7 @@ static void nvg__renderXYUV(NVGcontext* ctx, NVGvertex* verts, int nverts)
 	NVGpaint paint = state->fill;
 
 	// Render triangles.
-	paint.image = ctx->fontImages[ctx->fontImageIdx];
+	paint.image = 15;//ctx->fontImages[ctx->fontImageIdx];
 
 	// Apply global alpha
 	paint.innerColor.a *= state->alpha;
@@ -2568,10 +2568,10 @@ float nvgXYUV_ADD(NVGcontext* ctx)
 
 	nvg__vset(&verts[nverts], 100, 100, 0, 0); nverts++;
 	nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
-	nvg__vset(&verts[nverts], 300, 100, 0, 1); nverts++;
-	nvg__vset(&verts[nverts], 300, 100, 0, 1); nverts++;
+	nvg__vset(&verts[nverts], 500, 100, 0, 1); nverts++;
+	nvg__vset(&verts[nverts], 500, 100, 0, 1); nverts++;
 	nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
-	nvg__vset(&verts[nverts], 300, 300, 1, 1); nverts++;
+	nvg__vset(&verts[nverts], 500, 300, 1, 1); nverts++;
 
 	nvg__renderXYUV(ctx, verts, nverts);
 	return 1.0;	
