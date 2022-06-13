@@ -2558,6 +2558,7 @@ static int nvg__isTransformFlipped(const float *xform)
 
 float nvgXYUV_ADD(NVGcontext* ctx)
 {
+	NVGstate* state = nvg__getState(ctx);
 	int cverts = 0;
 	NVGvertex* verts;	
 	int nverts = 0;	
@@ -2566,12 +2567,22 @@ float nvgXYUV_ADD(NVGcontext* ctx)
 	verts = nvg__allocTempVerts(ctx, cverts);
 	if (verts == NULL) return 0;
 
-	nvg__vset(&verts[nverts], 100, 100, 0, 0); nverts++;
-	nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
-	nvg__vset(&verts[nverts], 500, 100, 0, 1); nverts++;
-	nvg__vset(&verts[nverts], 500, 100, 0, 1); nverts++;
-	nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
-	nvg__vset(&verts[nverts], 500, 300, 1, 1); nverts++;
+	float x,y;
+	nvgTransformPoint(&x,&y,state->xform,100,100); 	nvg__vset(&verts[nverts], x, y, 0, 0); nverts++;
+	nvgTransformPoint(&x,&y,state->xform,100,300); 	nvg__vset(&verts[nverts], x, y, 1, 0); nverts++;
+	nvgTransformPoint(&x,&y,state->xform,500,100); 	nvg__vset(&verts[nverts], x, y, 0, 1); nverts++;
+	nvgTransformPoint(&x,&y,state->xform,500,100); 	nvg__vset(&verts[nverts], x, y, 0, 1); nverts++;
+	nvgTransformPoint(&x,&y,state->xform,100,300); 	nvg__vset(&verts[nverts], x, y, 1, 0); nverts++;
+	nvgTransformPoint(&x,&y,state->xform,500,300); 	nvg__vset(&verts[nverts], x, y, 1, 1); nverts++;
+
+
+
+	// nvg__vset(&verts[nverts], 100, 100, 0, 0); nverts++;
+	// nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
+	// nvg__vset(&verts[nverts], 500, 100, 0, 1); nverts++;
+	// nvg__vset(&verts[nverts], 500, 100, 0, 1); nverts++;
+	// nvg__vset(&verts[nverts], 100, 300, 1, 0); nverts++;
+	// nvg__vset(&verts[nverts], 500, 300, 1, 1); nverts++;
 
 	nvg__renderXYUV(ctx, verts, nverts);
 	return 1.0;	
