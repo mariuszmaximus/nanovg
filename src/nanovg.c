@@ -1978,8 +1978,7 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 				// if ((pts[j].flags & NVG_PT_CORNER_XYUV) == NVG_PT_CORNER_XYUV)
 	  			// 	nvg__vset(dst, pts[j].x, pts[j].y, pts[j].u,pts[j].v);
 				// else
-				// 	nvg__vset(dst, pts[j].x, pts[j].y, 0.5f,1);
-	  			 	nvg__vset(dst, pts[j].x, pts[j].y, pts[j].u,pts[j].v);
+					nvg__vset(dst, pts[j].x, pts[j].y, 0.5f,1);
 				dst++;
 			}
 		}

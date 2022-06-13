@@ -69,7 +69,7 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 	nvgStrokeColor(vg, nvgRGBA(0,0,0,32));
 	nvgStroke(vg);
 	return;
-	
+
 	if(2<1)
 	{
 		nvgXYUV_ADD(vg);
@@ -301,8 +301,8 @@ int main()
 
 		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
 
-		renderDemoX(vg, mx,my, winWidth,winHeight, t, blowup, &data);
-		//renderDemo(vg, mx,my, winWidth,winHeight, t, blowup, &data);
+		//renderDemoX(vg, mx,my, winWidth,winHeight, t, blowup, &data);
+		renderDemo(vg, mx,my, winWidth,winHeight, t, blowup, &data);
 
 		// renderGraph(vg, 5,5, &fps);
 		// renderGraph(vg, 5+200+5,5, &cpuGraph);
