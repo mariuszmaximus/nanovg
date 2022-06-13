@@ -70,11 +70,26 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 	// nvgStroke(vg);
 	// return;
 
+
+
 	//if(2<1)
 	{
+		nvgSave(vg);
+		//nvgScissor(vg, 0,0,200,200);
+
+
+		NVGpaint imgPaint = nvgImagePattern(vg, imgw, imgw, imgw,imgh, 0, image0, 1);
+		nvgFillPaint(vg, imgPaint);
+		nvgTranslate(vg, 0, 100);
 		nvgXYUV_ADD(vg);
+
+		nvgRestore(vg);
+
+
 		return;
 	}
+
+
 
 	//if(2<1)
 	{
@@ -89,7 +104,8 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 
 	if(2<1)
 	{
-	NVGpaint imgPaint = nvgImagePattern(vg, imgw, imgw, imgw,imgh, 0, image0, 1);
+		NVGpaint imgPaint = nvgImagePattern(vg, imgw, imgw, imgw,imgh, 0, image0, 1);
+
 		nvgBeginPath(vg);
 
 	// 	//nvgRect(vg, 0,0, width/2 ,height/2);
