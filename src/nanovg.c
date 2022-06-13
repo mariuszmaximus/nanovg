@@ -2537,7 +2537,7 @@ static void nvg__renderXYUV(NVGcontext* ctx, NVGvertex* verts, int nverts)
 	NVGpaint paint = state->fill;
 
 	// Render triangles.
-	paint.image = 15;//ctx->fontImages[ctx->fontImageIdx];
+	//paint.image = 15;//ctx->fontImages[ctx->fontImageIdx];
 
 	// Apply global alpha
 	paint.innerColor.a *= state->alpha;
