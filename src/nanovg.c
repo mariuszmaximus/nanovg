@@ -2575,6 +2575,34 @@ static int nvg__isTransformFlipped(const float *xform)
 	return( det < 0);
 }
 
+float nvg_add_finish(NVGcontext* ctx)
+{
+	NVGpathCache* cache = ctx->cache;
+	NVGvertex* verts;
+	NVGvertex* dst;
+
+	int cverts,i;	
+	// Calculate max vertex usage.
+	cverts = 0;
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		int loop = (path->closed == 0) ? 0 : 1;
+		// if (lineJoin == NVG_ROUND)
+		// 	cverts += (path->count + path->nbevel*(ncap+2) + 1) * 2; // plus one for loop
+		// else
+		// 	cverts += (path->count + path->nbevel*5 + 1) * 2; // plus one for loop
+		// if (loop == 0) {
+		// 	// space for caps
+		// 	if (lineCap == NVG_ROUND) {
+		// 		cverts += (ncap*2 + 2)*2;
+		// 	} else {
+		// 		cverts += (3+3)*2;
+		// 	}
+		// }
+	}
+
+}
+
 float nvgXYUV_ADD(NVGcontext* ctx)
 {
 	NVGstate* state = nvg__getState(ctx);

@@ -599,6 +599,8 @@ void nvgFontFace(NVGcontext* ctx, const char* font);
 
 // Draw XYUV
 float nvgXYUV_ADD(NVGcontext* ctx);
+float nvg_add_finish(NVGcontext* ctx);
+
 
 // Draws text string at specified location. If end is specified only the sub-string up to the end is drawn.
 float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end);

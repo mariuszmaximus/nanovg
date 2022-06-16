@@ -95,6 +95,8 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 		nvg_add(vg,100,100,0,0,  100,300,0,1);
 		nvg_add(vg,500,100,1,0,  500,300,1,1);
 
+		nvg_add_finish(vg);
+
 		nvgRestore(vg);
 
 
