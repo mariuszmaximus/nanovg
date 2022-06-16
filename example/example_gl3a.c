@@ -84,6 +84,17 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 		//nvgTranslate(vg, 0, 100);
 		nvgXYUV_ADD(vg);
 
+	// nvgTransformPoint(&x,&y,state->xform,100,100); 	nvg__vset(&verts[nverts], x, y, 0, 0); nverts++;
+	// nvgTransformPoint(&x,&y,state->xform,100,300); 	nvg__vset(&verts[nverts], x, y, 1, 0); nverts++;
+	// nvgTransformPoint(&x,&y,state->xform,500,100); 	nvg__vset(&verts[nverts], x, y, 0, 1); nverts++;
+	// nvgTransformPoint(&x,&y,state->xform,500,100); 	nvg__vset(&verts[nverts], x, y, 0, 1); nverts++;
+	// nvgTransformPoint(&x,&y,state->xform,100,300); 	nvg__vset(&verts[nverts], x, y, 1, 0); nverts++;
+	// nvgTransformPoint(&x,&y,state->xform,500,300); 	nvg__vset(&verts[nverts], x, y, 1, 1); nverts++;
+
+
+		nvg_add(vg,100,100,0,0,  100,300,0,1);
+		nvg_add(vg,500,100,1,0,  500,300,1,1);
+
 		nvgRestore(vg);
 
 

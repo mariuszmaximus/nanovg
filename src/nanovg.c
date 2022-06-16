@@ -60,6 +60,7 @@ enum NVGcommands {
 	NVG_WINDING = 4,
 	NVG_XYUVSTART =    5,
 	NVG_XYUV =    6,
+	NVG_ADD =    7,
 };
 
 enum NVGpointFlags
@@ -1107,6 +1108,11 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
   			ctx->commandx = vals[nvals-2-2];
 			ctx->commandy = vals[nvals-1-2];
 		}
+		if((int)vals[0] == NVG_ADD)
+		{
+  			ctx->commandx = vals[nvals-2-2];
+			ctx->commandy = vals[nvals-1-2];
+		}
 	}
 
 	// transform commands
@@ -1141,6 +1147,11 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 		case NVG_XYUV:
 			nvgTransformPoint(&vals[i+1],&vals[i+2], state->xform, vals[i+1],vals[i+2]);
 			i += 5;
+			break;
+		case NVG_ADD:
+			nvgTransformPoint(&vals[i+1],&vals[i+2], state->xform, vals[i+1],vals[i+2]);
+			nvgTransformPoint(&vals[i+5],&vals[i+6], state->xform, vals[i+5],vals[i+6]);
+			i += 9;
 			break;
 		default:
 			i++;
@@ -2050,6 +2061,14 @@ void nvgXYUVMoveTo(NVGcontext* ctx, float x, float y,float u, float v)
 	float vals[] = { NVG_XYUVSTART, x, y, u, v };
 	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
 }
+
+void nvg_add(NVGcontext* ctx, float x0, float y0, float u0, float v0, 
+                              float x1, float y1, float u1, float v1)
+{
+	float vals[] = { NVG_ADD, x0, y0, u0, v0, x1, y1, u1, v1};
+	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+}
+
 
 void nvgXYUV(NVGcontext* ctx, float x, float y, float u, float v)
 {

@@ -466,6 +466,8 @@ void nvgMoveTo(NVGcontext* ctx, float x, float y);
 
 void nvgXYUVMoveTo(NVGcontext* ctx, float x, float y,float u, float v);
 void nvgXYUV(NVGcontext* ctx, float x, float y, float u, float v);
+void nvg_add(NVGcontext* ctx, float x0, float y0, float u0, float v0,   float x1, float y1, float u1, float v1);
+
 
 // Adds line segment from the last point in the path to the specified point.
 void nvgLineTo(NVGcontext* ctx, float x, float y);
