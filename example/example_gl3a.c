@@ -122,6 +122,12 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 
 	//if(2<1)
 	{
+		double Angle = 60;
+		double Radius = 50;
+		double Depth = 200;
+		int steps=0;
+
+
 		nvgSave(vg);
 		//nvgScissor(vg, 0,0,200,200);
         nvgBeginPath(vg);
@@ -142,8 +148,32 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 
 		nvg_path_begin(vg);
 
-		nvg_add(vg,100,100,0,0,  100,300,0,1);
-		nvg_add(vg,500,100,1,0,  500,300,1,1);
+		 nvg_add(vg,100,100,0,0,  100,300,0,1);
+		 nvg_add(vg,500,100,1,0,  500,300,1,1);
+		//  nvg_add(vg,2000,100,0,0,  2000,300,0,1);
+
+		 nvg_add(vg,500,100,0,0,  500,300,0,1);
+		 nvg_add(vg,100,100,1,0,  100,300,1,1);
+
+
+		for(int i=0; i<steps ; ++i)
+		{
+			double kat = /*-90 -Angle/2 + */  (Angle/(steps-1))*i;
+			printf("[%d] kat=%f\n", i, kat);
+
+			double kat_rad = kat * (M_PI/180);
+
+			double x1 = cos(kat_rad) * Radius +300;
+			double x2 = cos(kat_rad) * (Radius+Depth)+300;
+			double y1 = sin(kat_rad) * Radius+300;
+			double y2 = sin(kat_rad) * (Radius+Depth)+300;
+            
+			double ulamek = (double)i / (steps-1);
+			 
+		    nvg_add(vg,x1,y1, ulamek ,0 ,  x2,y2,ulamek,1);
+
+		}
+
 
 		nvg_add_finish(vg); // odpowiednik nvgFill
 
