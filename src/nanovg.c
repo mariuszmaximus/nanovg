@@ -61,6 +61,8 @@ enum NVGcommands {
 	NVG_XYUVSTART =    5,
 	NVG_XYUV =    6,
 	NVG_ADD =    7,
+	NVG_PATH_BEGIN =    8,
+	NVG_PATH_END =    9,
 };
 
 enum NVGpointFlags
@@ -105,15 +107,15 @@ struct NVGpoint {
 typedef struct NVGpoint NVGpoint;
 
 struct NVGpathCache {
-	NVGpoint* points;
-	int npoints;
-	int cpoints;
+	NVGpoint* points;  // NVG Points (not GL !!!)
+	int npoints;  // NVG Points number used  
+	int cpoints;  // NVG Points count
 	NVGpath* paths;
 	int npaths;
 	int cpaths;
-	NVGvertex* verts;
-	int nverts;
-	int cverts;
+	NVGvertex* verts; // GL Vertex
+	int nverts;  // GL Vertex number used 
+	int cverts;  // GL Vertex count
 	float bounds[4];
 };
 typedef struct NVGpathCache NVGpathCache;
@@ -1153,6 +1155,12 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 			nvgTransformPoint(&vals[i+5],&vals[i+6], state->xform, vals[i+5],vals[i+6]);
 			i += 9;
 			break;
+		case NVG_PATH_BEGIN:
+			i++;
+			break;
+		case NVG_PATH_END:
+			i++;
+			break;
 		default:
 			i++;
 		}
@@ -1212,7 +1220,10 @@ static void nvg__addPoint(NVGcontext* ctx, float x, float y, int flags)
 
 	if (path->count > 0 && ctx->cache->npoints > 0) {
 		pt = nvg__lastPoint(ctx);
+		// nie dodaje punktow jak roznica jest bardzo mala !!!!
 		if (nvg__ptEquals(pt->x,pt->y, x,y, ctx->distTol)) {
+			printf("nie dodaje punktow jak roznica jest bardzo mala !!!! (%f %f)\n", x,y);
+
 			pt->flags |= flags;
 			return;
 		}
@@ -1445,6 +1456,25 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
 			i += 5;
 			break;
+		case NVG_ADD:
+		    printf("	NVG_ADD\n");
+			p = &ctx->commands[i+1];
+			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
+			nvg__addPointXYUV(ctx, p[4], p[5], NVG_PT_CORNER_XYUV, p[6], p[7]);
+			i += 9;
+			break;
+
+		case NVG_PATH_BEGIN:
+		    printf("	NVG_PATH_BEGIN\n");
+			nvg__addPath(ctx);
+			i++;
+			break;
+		case NVG_PATH_END:
+		    printf("	NVG_PATH_END\n");
+			nvg__closePath(ctx);
+			i++;
+			break;
+
 		default:
 			i++;
 		}
@@ -1916,6 +1946,87 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 	return 1;
 }
 
+
+static int nvg__expandFill_XYUV(NVGcontext* ctx, float w, int lineJoin, float miterLimit,  NVGvertex** verts_out, int *nverts_out )
+{
+	printf("nvg__expandFill\n");
+	NVGpathCache* cache = ctx->cache;
+	NVGvertex* verts;
+	NVGvertex* dst;
+	int cverts, convex, i, j;
+	float aa = ctx->fringeWidth;
+	int fringe = w > 0.0f;
+
+
+	// Calculate max vertex usage.
+	cverts = 0;
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		int n = path->count; 
+		n = (n / 2) -1; // dla kazdej pary sa dwa trójkaty czyli 6 punktow
+		cverts += n*6; 
+		printf("cverts=%d\n",cverts );
+		// if (fringe)
+		// 	cverts += (path->count + path->nbevel*5 + 1) * 2; // plus one for loop
+	}
+
+	verts = nvg__allocTempVerts(ctx, cverts);
+	if (verts == NULL) return 0;
+
+	*verts_out = verts; 
+
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		NVGpoint* pts = &cache->points[path->first];
+		NVGpoint* p0;
+		NVGpoint* p1;
+		float rw, lw, woff;
+		float ru, lu;
+
+		// Calculate shape vertices.
+		woff = 0.5f*aa;
+		dst = verts;
+		path->fill = dst;
+
+		int n = path->count; 
+		n = (n / 2) -1; // dla kazdej pary sa dwa trójkaty czyli 6 punktow
+
+		// ---- points
+        // [0]   [2]
+        // [1]   [3]
+        // ---- vertex  
+		// [0][2]     [3]    
+        // [1]     [4][5]  
+		for (j = 0; j < n; ++j) {
+			dst = verts;
+			dst += j*6;
+			//
+			pts = &cache->points[path->first];
+			pts += j*2;
+
+			// triangle 
+			nvg__vset(dst, pts[0].x, pts[0].y, pts[0].u, pts[0].v);  dst++; 
+			nvg__vset(dst, pts[1].x, pts[1].y, pts[1].u, pts[1].v);  dst++; 
+			nvg__vset(dst, pts[2].x, pts[2].y, pts[2].u, pts[2].v);  dst++; 
+			// triangle 
+			nvg__vset(dst, pts[2].x, pts[2].y, pts[2].u, pts[2].v);  dst++; 
+			nvg__vset(dst, pts[1].x, pts[1].y, pts[1].u, pts[1].v);  dst++; 
+			nvg__vset(dst, pts[3].x, pts[3].y, pts[3].u, pts[3].v);  dst++; 
+		}
+
+
+		path->nfill = (int)(dst - verts);
+
+		*nverts_out  = path->nfill; 
+		verts = dst;  // ustawiam wartosc dla nastepnej iteracji po npaths !!!
+
+		path->stroke = NULL;
+		path->nstroke = 0;
+	}
+
+	return 1;	
+}
+
 static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLimit)
 {
 	printf("nvg__expandFill\n");
@@ -2069,6 +2180,18 @@ void nvg_add(NVGcontext* ctx, float x0, float y0, float u0, float v0,
 	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
 }
 
+
+void nvg_path_begin(NVGcontext* ctx)
+{
+	float vals[] = { NVG_PATH_BEGIN};
+	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+}
+
+void nvg_path_end(NVGcontext* ctx)
+{
+	float vals[] = { NVG_PATH_END};
+	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+}
 
 void nvgXYUV(NVGcontext* ctx, float x, float y, float u, float v)
 {
@@ -2579,28 +2702,28 @@ float nvg_add_finish(NVGcontext* ctx)
 {
 	NVGpathCache* cache = ctx->cache;
 	NVGvertex* verts;
+	int nverts;
 	NVGvertex* dst;
+	
+	NVGstate* state = nvg__getState(ctx);
+	NVGpaint paint = state->fill;
 
-	int cverts,i;	
-	// Calculate max vertex usage.
-	cverts = 0;
-	for (i = 0; i < cache->npaths; i++) {
-		NVGpath* path = &cache->paths[i];
-		int loop = (path->closed == 0) ? 0 : 1;
-		// if (lineJoin == NVG_ROUND)
-		// 	cverts += (path->count + path->nbevel*(ncap+2) + 1) * 2; // plus one for loop
-		// else
-		// 	cverts += (path->count + path->nbevel*5 + 1) * 2; // plus one for loop
-		// if (loop == 0) {
-		// 	// space for caps
-		// 	if (lineCap == NVG_ROUND) {
-		// 		cverts += (ncap*2 + 2)*2;
-		// 	} else {
-		// 		cverts += (3+3)*2;
-		// 	}
-		// }
-	}
+	nvg__flattenPaths(ctx);
 
+	nvg__expandFill_XYUV(ctx, 0.0f, NVG_MITER, 2.4f, &verts, &nverts);
+
+
+	// Render triangles.
+	//paint.image = 15;//ctx->fontImages[ctx->fontImageIdx];
+
+	// Apply global alpha
+	paint.innerColor.a *= state->alpha;
+	paint.outerColor.a *= state->alpha;
+
+	ctx->params.renderTriangles(ctx->params.userPtr, &paint, state->compositeOperation, &state->scissor, verts, nverts, ctx->fringeWidth);
+
+	ctx->drawCallCount++;
+	ctx->textTriCount += nverts/3;
 }
 
 float nvgXYUV_ADD(NVGcontext* ctx)

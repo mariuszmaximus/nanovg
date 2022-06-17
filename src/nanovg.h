@@ -63,12 +63,13 @@ enum NVGsolidity {
 	NVG_HOLE = 2,			// CW
 };
 
-enum NVGlineCap {
+// sposob  zakonczen linii 
+enum NVGlineCap {  
 	NVG_BUTT,
-	NVG_ROUND,
+	NVG_ROUND,  // zaokraglony 
 	NVG_SQUARE,
 	NVG_BEVEL,
-	NVG_MITER,
+	NVG_MITER,  
 };
 
 enum NVGalign {
@@ -467,6 +468,8 @@ void nvgMoveTo(NVGcontext* ctx, float x, float y);
 void nvgXYUVMoveTo(NVGcontext* ctx, float x, float y,float u, float v);
 void nvgXYUV(NVGcontext* ctx, float x, float y, float u, float v);
 void nvg_add(NVGcontext* ctx, float x0, float y0, float u0, float v0,   float x1, float y1, float u1, float v1);
+void nvg_path_end(NVGcontext* ctx);
+void nvg_path_begin(NVGcontext* ctx);
 
 
 // Adds line segment from the last point in the path to the specified point.

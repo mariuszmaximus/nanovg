@@ -66,6 +66,54 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 				float t, int blowup, DemoData* data)
 {
 
+
+	if(2<1)
+	{
+    nvgBeginPath(vg);
+		// ctx->cache->npoints = 0;
+		// ctx->cache->npaths = 0;		
+    nvgRect(vg,100, 100, 300, 150);
+		// float vals[] = {
+		// 	NVG_MOVETO, x,y,
+		// 	NVG_LINETO, x,y+h,
+		// 	NVG_LINETO, x+w,y+h,
+		// 	NVG_LINETO, x+w,y,
+		// 	NVG_CLOSE
+		// };
+		// nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+		//  ==== >  tutaj sa dane np. wierzchokli ctx->commands[
+		//  ==== >  tutaj jest zwiekszany licznik ctx->ncommands += nvals;	
+    nvgFillColor(vg,nvgRGBA(255, 0, 0, 128));
+		// void nvgFillColor(NVGcontext* ctx, NVGcolor color)
+		// {
+		// 	NVGstate* state = nvg__getState(ctx);
+		// 	nvg__setPaintColor(&state->fill, color);
+		// }
+				// static void nvg__setPaintColor(NVGpaint* p, NVGcolor color)
+				// {
+				// 	memset(p, 0, sizeof(*p));
+				// 	nvgTransformIdentity(p->xform);
+				// 	p->radius = 0.0f;
+				// 	p->feather = 1.0f;
+				// 	p->innerColor = color;
+				// 	p->outerColor = color;
+				// }
+    nvgFill(vg);
+		// nvgFill == > 
+		//     nvg__flattenPaths ????  rozkodowuuje rozkazy !!! ???
+		//        nvg__addPoint  === > dodaje dane:ctx->cache->points
+		//     nvg__expandFill
+		//        nvg__allocTempVerts
+		//        nvg__vset  
+    nvgClosePath(vg);
+		// void nvgClosePath(NVGcontext* ctx)
+		// {
+		// 	float vals[] = { NVG_CLOSE };
+		// 	nvg__appendCommands(ctx, vals, NVG_COUNTOF(vals));
+		// }
+
+	return ;
+	}
 	// nvgStrokeColor(vg, nvgRGBA(0,0,0,32));
 	// nvgStroke(vg);
 	// return;
@@ -76,13 +124,14 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 	{
 		nvgSave(vg);
 		//nvgScissor(vg, 0,0,200,200);
+        nvgBeginPath(vg);
 
 
 		NVGpaint imgPaint = nvgImagePattern(vg, imgw, imgw, imgw,imgh, 0, image0, 1);
 		nvgFillPaint(vg, imgPaint);
 		//nvgRotate(vg,45);
 		//nvgTranslate(vg, 0, 100);
-		nvgXYUV_ADD(vg);
+		// /nvgXYUV_ADD(vg);
 
 	// nvgTransformPoint(&x,&y,state->xform,100,100); 	nvg__vset(&verts[nverts], x, y, 0, 0); nverts++;
 	// nvgTransformPoint(&x,&y,state->xform,100,300); 	nvg__vset(&verts[nverts], x, y, 1, 0); nverts++;
@@ -91,11 +140,15 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 	// nvgTransformPoint(&x,&y,state->xform,100,300); 	nvg__vset(&verts[nverts], x, y, 1, 0); nverts++;
 	// nvgTransformPoint(&x,&y,state->xform,500,300); 	nvg__vset(&verts[nverts], x, y, 1, 1); nverts++;
 
+		nvg_path_begin(vg);
 
 		nvg_add(vg,100,100,0,0,  100,300,0,1);
 		nvg_add(vg,500,100,1,0,  500,300,1,1);
 
-		nvg_add_finish(vg);
+		nvg_add_finish(vg); // odpowiednik nvgFill
+
+		nvg_path_end(vg);
+
 
 		nvgRestore(vg);
 
