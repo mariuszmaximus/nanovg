@@ -125,7 +125,7 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 		double Angle = 60;
 		double Radius = 50;
 		double Depth = 200;
-		int steps=0;
+		int steps=128;
 
 
 		nvgSave(vg);
@@ -148,17 +148,17 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 
 		nvg_path_begin(vg);
 
-		 nvg_add(vg,100,100,0,0,  100,300,0,1);
-		 nvg_add(vg,500,100,1,0,  500,300,1,1);
-		//  nvg_add(vg,2000,100,0,0,  2000,300,0,1);
+		//  nvg_add(vg,100,100,0,0,  100,300,0,1);
+		//  nvg_add(vg,500,100,1,0,  500,300,1,1);
+		// //  nvg_add(vg,2000,100,0,0,  2000,300,0,1);
 
-		 nvg_add(vg,500,100,0,0,  500,300,0,1);
-		 nvg_add(vg,100,100,1,0,  100,300,1,1);
+		//  nvg_add(vg,500,100,0,0,  500,300,0,1);
+		//  nvg_add(vg,100,100,1,0,  100,300,1,1);
 
 
 		for(int i=0; i<steps ; ++i)
 		{
-			double kat = /*-90 -Angle/2 + */  (Angle/(steps-1))*i;
+			double kat = /*-90 -Angle/2 + */ Angle/2+ 90-  (Angle/(steps-1))*i;
 			printf("[%d] kat=%f\n", i, kat);
 
 			double kat_rad = kat * (M_PI/180);
