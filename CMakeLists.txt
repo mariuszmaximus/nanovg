@@ -10,7 +10,7 @@ add_compile_definitions(NANOVG_GLEW)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 add_compile_definitions(DEMO_MSAA) 
 add_compile_definitions(NANOVG_EXAMPLE_FOLDER="../../example/")  # path for fonts and images
-add_compile_definitions(MORE_DEBUG)
+# add_compile_definitions(MORE_DEBUG)
 set(NANOVG_GLES OFF) 
 
 add_library(nanovg src/nanovg.c src/nanovg.h)

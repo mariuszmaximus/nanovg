@@ -1213,7 +1213,9 @@ static NVGpoint* nvg__lastPoint(NVGcontext* ctx)
 
 static void nvg__addPoint(NVGcontext* ctx, float x, float y, int flags)
 {
+	#ifdef MORE_DEBUG
 	printf("nvg__addPoint (%f %f)\n", x,y);
+	#endif	
 	NVGpath* path = nvg__lastPath(ctx);
 	NVGpoint* pt;
 	if (path == NULL) return;
@@ -1402,27 +1404,35 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 		return;
 
 
+	#ifdef MORE_DEBUG
 	printf("Commands:\n");
+	#endif			
 	// Flatten
 	i = 0;
 	while (i < ctx->ncommands) {
 		int cmd = (int)ctx->commands[i];
 		switch (cmd) {
 		case NVG_MOVETO:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_MOVETO\n");
+		#endif			
 			nvg__addPath(ctx);
 			p = &ctx->commands[i+1];
 			nvg__addPoint(ctx, p[0], p[1], NVG_PT_CORNER);
 			i += 3;
 			break;
 		case NVG_LINETO:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_LINETO\n");
+		#endif			
 			p = &ctx->commands[i+1];
 			nvg__addPoint(ctx, p[0], p[1], NVG_PT_CORNER);
 			i += 3;
 			break;
 		case NVG_BEZIERTO:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_BEZIERTO\n");
+		#endif			
 			last = nvg__lastPoint(ctx);
 			if (last != NULL) {
 				cp1 = &ctx->commands[i+1];
@@ -1433,17 +1443,23 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 			i += 7;
 			break;
 		case NVG_CLOSE:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_CLOSE\n");
+		#endif			
 			nvg__closePath(ctx);
 			i++;
 			break;
 		case NVG_WINDING:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_WINDING\n");
+		#endif			
 			nvg__pathWinding(ctx, (int)ctx->commands[i+1]);
 			i += 2;
 			break;
 		case NVG_XYUVSTART:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_XYUVSTART\n");
+		#endif			
 			nvg__addPath(ctx);
 			p = &ctx->commands[i+1];
 			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
@@ -1451,13 +1467,17 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 			break;
 
 		case NVG_XYUV:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_XYUV\n");
+		#endif			
 			p = &ctx->commands[i+1];
 			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
 			i += 5;
 			break;
 		case NVG_ADD:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_ADD\n");
+		#endif			
 			p = &ctx->commands[i+1];
 			nvg__addPointXYUV(ctx, p[0], p[1], NVG_PT_CORNER_XYUV, p[2], p[3]);
 			nvg__addPointXYUV(ctx, p[4], p[5], NVG_PT_CORNER_XYUV, p[6], p[7]);
@@ -1465,12 +1485,16 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 			break;
 
 		case NVG_PATH_BEGIN:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_PATH_BEGIN\n");
+		#endif			
 			nvg__addPath(ctx);
 			i++;
 			break;
 		case NVG_PATH_END:
+		#ifdef MORE_DEBUG
 		    printf("	NVG_PATH_END\n");
+		#endif			
 			nvg__closePath(ctx);
 			i++;
 			break;
@@ -1949,7 +1973,9 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 
 static int nvg__expandFill_XYUV(NVGcontext* ctx, float w, int lineJoin, float miterLimit,  NVGvertex** verts_out, int *nverts_out )
 {
-	printf("nvg__expandFill\n");
+	#ifdef MORE_DEBUG
+	printf("nvg__expandFill_XYUV\n");
+	#endif
 	NVGpathCache* cache = ctx->cache;
 	NVGvertex* verts;
 	NVGvertex* dst;
@@ -1965,7 +1991,9 @@ static int nvg__expandFill_XYUV(NVGcontext* ctx, float w, int lineJoin, float mi
 		int n = path->count; 
 		n = (n / 2) -1; // dla kazdej pary sa dwa trójkaty czyli 6 punktow
 		cverts += n*6; 
+		#ifdef MORE_DEBUG
 		printf("cverts=%d\n",cverts );
+		#endif
 		// if (fringe)
 		// 	cverts += (path->count + path->nbevel*5 + 1) * 2; // plus one for loop
 	}
@@ -2029,7 +2057,9 @@ static int nvg__expandFill_XYUV(NVGcontext* ctx, float w, int lineJoin, float mi
 
 static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLimit)
 {
+	#ifdef MORE_DEBUG
 	printf("nvg__expandFill\n");
+	#endif
 	NVGpathCache* cache = ctx->cache;
 	NVGvertex* verts;
 	NVGvertex* dst;

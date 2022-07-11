@@ -159,7 +159,7 @@ void renderDemoX(NVGcontext* vg, float mx, float my, float width, float height,
 		for(int i=0; i<steps ; ++i)
 		{
 			double kat = /*-90 -Angle/2 + */ Angle/2+ 90-  (Angle/(steps-1))*i;
-			printf("[%d] kat=%f\n", i, kat);
+			//printf("[%d] kat=%f\n", i, kat);
 
 			double kat_rad = kat * (M_PI/180);
 
